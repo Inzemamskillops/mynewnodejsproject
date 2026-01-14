@@ -1,54 +1,18 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql');
 
-// Run express server
 const app = express();
-const PORT = 3000; // You can change the port if needed
+const PORT = 3000;
 
-// Establishing a connection with the database
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'password',
-  database: 'sadhixdb'
-});
-
-connection.connect((err) => {
-    if (err) throw err;
-    console.log("Connected to MySQL database.");
-});
-
-// Serve static files from the 'public' directory
-// console.log(__dirname);
+// Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Route to serve index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
+// API test route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', app: 'mynewnodejsproject' });
 });
 
-// API Endpoint to Fetch User Details
-app.get("/user/:id", (req, res) => {
-    const userId = parseInt(req.params.id);
-
-    if (!userId || isNaN(userId)) {
-        return res.status(400).json({ error: "Invalid user ID." });
-    }
-
-    const sqlQuery = `SELECT * FROM USER_INFO WHERE id = ?`;
-    connection.query(sqlQuery, [userId], (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: "Database query failed." });
-        }
-        if (result.length === 0) {
-            return res.status(404).json({ error: "User not found." });
-        }
-        // res.send(result[0].name + ' works for ' + result[0].company_name);
-        res.json(result[0]);
-    });
-});
-
+// Start server
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
